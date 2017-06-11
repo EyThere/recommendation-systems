@@ -47,6 +47,32 @@ with open("predicted.csv","r") as csvfile:
         predicted[(row['User_ID'], row['Movie_ID'])] = float(row['Rank']) 
     csvfile.close()
 
+def init_avg_ranks(): #initialize the avg ranks before updating it according to the data
+    for user, movie in User_Movie_rate:
+        if not avg_rank_by_id.has_key(user):
+            avg_rank_by_id[user] = {}
+            avg_rank_counter[user] = {}
+
+# get average genre rank for each user and genre combination  
+def avg_genres_rank_by_ids(): #output is a dict of {user_id:{genre1:user1_avg_rank_for_genre1, genre2:user1_avg_rank_for_genre2}..}
+    for user, movie in User_Movie_rate.keys():
+        for g in MovieGenres[movie]:
+            if avg_rank_by_id[user].has_key(g):
+
+                avg_rank_by_id[user][g] += User_Movie_rate[(user, movie)]
+                avg_rank_counter[user][g] += 1
+            else:
+                 avg_rank_by_id[user][g] = 0
+                 avg_rank_by_id[user][g] += User_Movie_rate[(user, movie)]
+                 avg_rank_counter[user][g] = 1
+
+
+    for user in avg_rank_by_id.keys():
+        for genre in avg_rank_by_id[user].keys():
+            avg_rank_by_id[user][genre] = float(avg_rank_by_id[user][genre]) / float(avg_rank_counter[user][genre])
+
+    return avg_rank_by_id	
+	
 # find the closest movies according to the D matrix
 def get_closest_movies(movie, D_matrix):
     movies = []
